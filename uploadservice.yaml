@@ -1,0 +1,42 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: fileupload
+  labels:
+    app: fileupload
+spec:
+  containers:
+    - name: fileupload
+      image: csaocpger/fileupload:2.0
+      ports:
+        - name: http
+          containerPort: 3000
+      env:
+        - name: UPLOAD_FOLDER
+          value: "/mnt/azure"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi
+      volumeMounts:
+        - mountPath: "/mnt/azure"
+          name: volume
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+        claimName: azurefile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fileupload-service
+spec:
+  selector:
+    app: fileupload
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: LoadBalancer
